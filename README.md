@@ -1,4 +1,4 @@
-# AeroTrack - Global Flight Tracker
+## AeroTrack - Global Flight Tracker
 
 AeroTrack is a premium, real-time flight tracking web application built with Next.js. It features a modern, stunning UI that displays flight search results in an authentic digital boarding pass format, powered by live flight data.
 
