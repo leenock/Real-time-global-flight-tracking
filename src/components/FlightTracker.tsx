@@ -48,6 +48,26 @@ export default function FlightTracker() {
     }).format(date);
   };
 
+  const getGoogleCalendarUrl = (flight: Flight) => {
+    const formatForCalendar = (isoString: string) => {
+      const date = new Date(isoString);
+      return date.toISOString().replace(/[-:]/g, '').replace(/\.\d{3}/, '');
+    };
+
+    const start = formatForCalendar(flight.departureTime);
+    const end = formatForCalendar(flight.arrivalTime);
+    const title = encodeURIComponent(`${flight.airline} Flight ${flight.flightNumber}`);
+    const location = encodeURIComponent(`${flight.origin.airport} to ${flight.destination.airport}`);
+    const details = encodeURIComponent(
+      `Flight: ${flight.airline} ${flight.flightNumber}\n` +
+      `From: ${flight.origin.city} (${flight.origin.airport}) - Terminal ${flight.origin.terminal}, Gate ${flight.origin.gate}\n` +
+      `To: ${flight.destination.city} (${flight.destination.airport}) - Terminal ${flight.destination.terminal}, Gate ${flight.destination.gate}\n` +
+      `Status: ${flight.status}\n`
+    );
+
+    return `https://calendar.google.com/calendar/render?action=TEMPLATE&text=${title}&dates=${start}/${end}&details=${details}&location=${location}`;
+  };
+
   return (
     <div className="w-full max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
       {/* Search Form Card */}
@@ -115,7 +135,13 @@ export default function FlightTracker() {
               
               <div className="grid gap-12">
                 {flights.map((flight) => (
-                  <div key={flight.id} className="relative bg-white rounded-[2.5rem] shadow-[0_20px_60px_rgba(0,0,0,0.08)] border border-slate-100/50 overflow-hidden flex flex-col lg:flex-row transform transition-all hover:shadow-[0_25px_70px_rgba(0,0,0,0.12)] hover:-translate-y-1">
+                  <a
+                    href={getGoogleCalendarUrl(flight)}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    key={flight.id}
+                    className="relative block bg-white rounded-[2.5rem] shadow-[0_20px_60px_rgba(0,0,0,0.08)] border border-slate-100/50 overflow-hidden flex flex-col lg:flex-row transform transition-all hover:shadow-[0_25px_70px_rgba(0,0,0,0.12)] hover:-translate-y-1 cursor-pointer"
+                  >
                     
                     {/* Main Boarding Pass Section */}
                     <div className="flex-1 p-8 sm:p-12">
@@ -262,7 +288,7 @@ export default function FlightTracker() {
                       </div>
                     </div>
 
-                  </div>
+                  </a>
                 ))}
               </div>
             </div>
