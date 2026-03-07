@@ -36,6 +36,35 @@ export default function FlightTracker() {
     }
   };
 
+  // Format an ISO date to a Google Calendar timestamp string: YYYYMMDDTHHmmssZ
+  const toGCalDate = (isoString: string) => {
+    return new Date(isoString).toISOString().replace(/[-:]/g, '').replace(/\.\d{3}/, '');
+  };
+
+  const buildGoogleCalendarUrl = (flight: Flight) => {
+    const start = toGCalDate(flight.departureTime);
+    const end   = toGCalDate(flight.arrivalTime);
+    const title = encodeURIComponent(
+      `${flight.flightNumber} – ${flight.origin.airport} → ${flight.destination.airport}`
+    );
+    const details = encodeURIComponent(
+      `Airline: ${flight.airline}\n` +
+      `Flight: ${flight.flightNumber}\n` +
+      `Status: ${flight.status}\n` +
+      `Duration: ${flight.duration}\n\n` +
+      `DEPARTURE\n` +
+      `Airport: ${flight.origin.airport} (${flight.origin.city})\n` +
+      `Terminal ${flight.origin.terminal} · Gate ${flight.origin.gate}\n\n` +
+      `ARRIVAL\n` +
+      `Airport: ${flight.destination.airport} (${flight.destination.city})\n` +
+      `Terminal ${flight.destination.terminal} · Gate ${flight.destination.gate}`
+    );
+    const location = encodeURIComponent(
+      `${flight.origin.city} (${flight.origin.airport}) → ${flight.destination.city} (${flight.destination.airport})`
+    );
+    return `https://calendar.google.com/calendar/render?action=TEMPLATE&text=${title}&dates=${start}/${end}&details=${details}&location=${location}`;
+  };
+
   const formatDate = (isoString: string, timeZone: string) => {
     const date = new Date(isoString);
     return new Intl.DateTimeFormat('en-US', {
@@ -46,26 +75,6 @@ export default function FlightTracker() {
       minute: '2-digit',
       timeZoneName: 'short',
     }).format(date);
-  };
-
-  const getGoogleCalendarUrl = (flight: Flight) => {
-    const formatForCalendar = (isoString: string) => {
-      const date = new Date(isoString);
-      return date.toISOString().replace(/[-:]/g, '').replace(/\.\d{3}/, '');
-    };
-
-    const start = formatForCalendar(flight.departureTime);
-    const end = formatForCalendar(flight.arrivalTime);
-    const title = encodeURIComponent(`${flight.airline} Flight ${flight.flightNumber}`);
-    const location = encodeURIComponent(`${flight.origin.airport} to ${flight.destination.airport}`);
-    const details = encodeURIComponent(
-      `Flight: ${flight.airline} ${flight.flightNumber}\n` +
-      `From: ${flight.origin.city} (${flight.origin.airport}) - Terminal ${flight.origin.terminal}, Gate ${flight.origin.gate}\n` +
-      `To: ${flight.destination.city} (${flight.destination.airport}) - Terminal ${flight.destination.terminal}, Gate ${flight.destination.gate}\n` +
-      `Status: ${flight.status}\n`
-    );
-
-    return `https://calendar.google.com/calendar/render?action=TEMPLATE&text=${title}&dates=${start}/${end}&details=${details}&location=${location}`;
   };
 
   return (
@@ -136,12 +145,14 @@ export default function FlightTracker() {
               <div className="grid gap-12">
                 {flights.map((flight) => (
                   <a
-                    href={getGoogleCalendarUrl(flight)}
+                    key={flight.id}
+                    href={buildGoogleCalendarUrl(flight)}
                     target="_blank"
                     rel="noopener noreferrer"
-                    key={flight.id}
-                    className="relative block bg-white rounded-[2.5rem] shadow-[0_20px_60px_rgba(0,0,0,0.08)] border border-slate-100/50 overflow-hidden flex flex-col lg:flex-row transform transition-all hover:shadow-[0_25px_70px_rgba(0,0,0,0.12)] hover:-translate-y-1 cursor-pointer"
+                    title="Add to Google Calendar"
+                    className="block group"
                   >
+                  <div className="relative bg-white rounded-[2.5rem] shadow-[0_20px_60px_rgba(0,0,0,0.08)] border border-slate-100/50 overflow-hidden flex flex-col lg:flex-row transform transition-all hover:shadow-[0_25px_70px_rgba(0,0,0,0.14)] hover:-translate-y-1.5 cursor-pointer">
                     
                     {/* Main Boarding Pass Section */}
                     <div className="flex-1 p-8 sm:p-12">
@@ -288,6 +299,7 @@ export default function FlightTracker() {
                       </div>
                     </div>
 
+                  </div>
                   </a>
                 ))}
               </div>

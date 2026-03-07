@@ -1,5 +1,20 @@
 @import "tailwindcss";
+@import "tw-animate-css";
 
+@keyframes fadeOutLabel {
+  0% {
+    opacity: 1;
+    transform: translateX(0) scale(1);
+  }
+  70% {
+    opacity: 1;
+    transform: translateX(0) scale(1);
+  }
+  100% {
+    opacity: 0;
+    transform: translateX(0.5rem) scale(0.95);
+  }
+}
 :root {
   --background: #ffffff;
   --foreground: #171717;
